@@ -1,6 +1,20 @@
 import csv, os, json
+import re
 import chromadb
 from app.models.object_helper import ItemModel
+
+def get_unique_hashes(dict_list):
+    unique_hashes = set()
+    for item in dict_list:
+        unique_hashes.add(item['hash'])
+    
+    unique_dicts = []
+    for hash in unique_hashes:
+        for item in dict_list:
+            if item['hash'] == hash:
+                unique_dicts.append(item)
+                break
+    return unique_dicts
 
 class DBQuery():
     def __init__(self, db_type):
@@ -12,8 +26,8 @@ class DBQuery():
         if self.db_type == "csv":
             self.db_location = "./app/data_base.csv"
         elif self.db_type == "chromadb":
-            self.client = chromadb.Client()
-            self.collection = self.client.create_collection("all-documents")
+            self.client = chromadb.PersistentClient(path='./chromadb')
+            # self.collection = self.client.create_collection("all-documents")
 
 
     def search_for_string(self, search_string):
@@ -69,4 +83,35 @@ class DBQuery():
     def delete_all_docs(self):
         self.client.delete_collection(name="all-documents")
         self.initalize()
+    
+    def get_tags(self):
+        collection = self.client.get_collection("all-documents")
+        tag_strings = [item.get('tags') for item in collection.get().get("metadatas") if item]
+        tags_full= []
+        for tag_string in tag_strings:
+            if tag_string:
+                tags_full.extend(tag_string.lower().split('|'))
+        return list(set(tags_full))
+    
+    def get_docs_by_tags(self, tags):
+        tag_compare = '|'.join(tags)
+        collection = self.client.get_collection("all-documents")
+        documents = collection.get().get("documents")
+        metadatas = collection.get().get("metadatas")
+        tag_strings = [(i, item.get('tags')) for i, item in enumerate(metadatas) if item]
+        docs = []
+        for idx,tag_string in tag_strings:
+            if tag_string:
+                match = re.search(tag_compare, tag_string.lower())
+                if match:
+                    metadata = metadatas[idx]
+                    header = metadata.pop('header')
+                    hash = metadata.pop('hash')
+                    original_content = metadata.pop('original_content')
+                    docs.append({"document":documents[idx],
+                                 "original_content": original_content,
+                                 "metadata": metadata,
+                                 "header": header,
+                                 "hash": hash})
+        return get_unique_hashes(docs)
 

@@ -2,7 +2,7 @@ import json
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from app.db_helper import DBQuery
 from app.models.object_helper import Doc, Item
@@ -19,19 +19,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class Query(BaseModel):
-    query: str
+class QueryPayload(BaseModel):
+    tags: Optional[List[str]] = None
+    query: Optional[str] = None
 
 @app.get("/")
 def read_root():
     return {"OK": "200"}
 
 @app.post("/docs/query")
-async def docs_query(query: Query):
+async def docs_query(query: QueryPayload):
+    tags = query.tags
+    if tags is not None and len(query.query)==0:
+        docs = db_conn.get_docs_by_tags(tags)
+        return {"result": docs}
+    
     query_str = query.query
     entries = db_conn.search_for_string(query_str)
-    json_entries = json.dumps(entries)
-    return {"item_value": json_entries}
+    # json_entries = json.dumps(entries)
+    return {"result": docs}
+
+@app.get("/docs/tags")
+async def docs_tags():
+    response = db_conn.get_tags()
+    return {"result": response}
 
 # Same as docs_query
 @app.get("/find_by_str/{item_value}")
