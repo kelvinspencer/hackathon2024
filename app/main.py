@@ -5,10 +5,10 @@ from pydantic import BaseModel
 from typing import Optional, Union
 
 from app.db_helper import DBQuery
-from app.models.object_helper import Item
+from app.models.object_helper import Doc, Item
 
 app = FastAPI()
-db_conn = DBQuery("csv")
+db_conn = DBQuery("chromadb")
 
 # Configure CORS settings
 app.add_middleware(
@@ -28,10 +28,12 @@ def read_root():
 
 @app.post("/docs/query")
 async def docs_query(query: Query):
-    print(query.query)
     query_str = query.query
-    return {"results": query_str}
+    entries = db_conn.search_for_string(query_str)
+    json_entries = json.dumps(entries)
+    return {"item_value": json_entries}
 
+# Same as docs_query
 @app.get("/find_by_str/{item_value}")
 def read_item(item_value: Union[str, None] = None):
     entries = db_conn.search_for_string(item_value)
@@ -46,5 +48,13 @@ def read_item(item_id: Union[str, None] = None):
 
 # @app.api_route('/items', methods=['POST', 'OPTIONS', 'HEAD'])
 @app.post("/add_doc/", status_code=201)
-async def create_item(item: Item = Body(...)):
+async def create_item(item: Doc = Body(...)):
     db_conn.create_doc(item)
+
+
+@app.get("/delete_all_docs")
+def delete_all_docs():
+    db_conn.delete_all_docs()
+    return True
+
+

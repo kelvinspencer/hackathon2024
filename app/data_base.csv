@@ -1,3 +1,5 @@
-id,name,description,price,tax
-0,Computer,Macbook,1000.0,5.0
-1,Windows Surface 2,Computer,900.0,10.0
+id,id,id.1,name,description,price,tax
+0,0.0,0.0,Computer,Macbook,1000.0,5.0
+1,1.0,1.0,Windows Surface 2,Computer,900.0,10.0
+2,2.0,,Windows Surface 2,Computer,900.0,10.0
+3,,,Windows Surface 2,Computer,900.0,10.0
