@@ -40,11 +40,12 @@ def read_item(item_value: Union[str, None] = None):
     json_entries = json.dumps(entries)
     return {"item_value": json_entries}
 
-@app.get("/find_by_id/{item_id}")
-def read_item(item_id: Union[str, None] = None):
-    entries = db_conn.find_by_id(item_id)
-    json_entries = json.dumps(entries)
-    return {"value": json_entries}
+# CSV only
+# @app.get("/find_by_id/{item_id}")
+# def read_item(item_id: Union[str, None] = None):
+#     entries = db_conn.find_by_id(item_id)
+#     json_entries = json.dumps(entries)
+#     return {"value": json_entries}
 
 # @app.api_route('/items', methods=['POST', 'OPTIONS', 'HEAD'])
 @app.post("/add_doc/", status_code=201)
