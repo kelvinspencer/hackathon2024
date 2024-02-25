@@ -3,6 +3,9 @@
 ### Source:
   - https://fastapi.tiangolo.com/deployment/docker/
 
+## Swagger Docs
+- Method: GET
+- http://localhost/docs
 
 ## How to Add a Doc
 - Method: POST
