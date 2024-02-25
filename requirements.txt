@@ -1,0 +1,10 @@
+fastapi
+pydantic
+uvicorn
+pandas
+black
+codecov 
+flake8
+mutmut
+requests
+chromadb
