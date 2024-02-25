@@ -2,6 +2,10 @@ import csv, os, json
 import re
 import chromadb
 from app.models.object_helper import ItemModel
+import vertexai
+import os
+from vertexai.language_models import TextGenerationModel
+from vertexai.preview.generative_models import GenerativeModel, GenerationConfig
 
 def get_unique_hashes(dict_list):
     unique_hashes = set()
@@ -27,7 +31,6 @@ class DBQuery():
             self.db_location = "./app/data_base.csv"
         elif self.db_type == "chromadb":
             self.client = chromadb.PersistentClient(path='./chromadb')
-            # self.collection = self.client.create_collection("all-documents")
 
 
     def search_for_string(self, search_string):
@@ -107,11 +110,13 @@ class DBQuery():
                     metadata = metadatas[idx]
                     header = metadata.pop('header')
                     hash = metadata.pop('hash')
+                    source_url = metadata.pop('source_url')
                     original_content = metadata.pop('original_content')
                     docs.append({"document":documents[idx],
                                  "original_content": original_content,
                                  "metadata": metadata,
                                  "header": header,
+                                 "source_url": source_url,
                                  "hash": hash})
         return get_unique_hashes(docs)
 

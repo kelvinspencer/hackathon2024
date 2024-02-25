@@ -30,14 +30,9 @@ def read_root():
 @app.post("/docs/query")
 async def docs_query(query: QueryPayload):
     tags = query.tags
-    if tags is not None and len(query.query)==0:
-        docs = db_conn.get_docs_by_tags(tags)
-        return {"result": docs}
-    
-    query_str = query.query
-    entries = db_conn.search_for_string(query_str)
-    # json_entries = json.dumps(entries)
+    docs = db_conn.get_docs_by_tags(tags)
     return {"result": docs}
+    
 
 @app.get("/docs/tags")
 async def docs_tags():
